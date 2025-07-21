@@ -1,27 +1,24 @@
 <?php
 
-
 namespace Modules\Chat\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Modules\Chat\Models\Conversation;
 use Modules\Chat\Models\Participant;
 use Modules\Chat\Repositories\ConversationRepository;
 use Modules\Chat\Repositories\MessageRepository;
+use Modules\Core\Exceptions\DurrbarException;
 use Modules\Core\Http\Controllers\CoreController;
-use Modules\Ecommerce\Exceptions\MarvelException;
 use Modules\Ecommerce\Http\Requests\MessageCreateRequest;
 use Prettus\Validator\Exceptions\ValidatorException;
-
 
 class MessageController extends CoreController
 {
     public $repository;
+
     public $conversationRepository;
 
     public function __construct(MessageRepository $repository, ConversationRepository $conversationRepository)
@@ -33,8 +30,6 @@ class MessageController extends CoreController
     /**
      * Display a listing of the resource.
      *
-     * @param Request $request
-     * @param $conversation_id
      * @return Collection|Message[]
      */
     public function index(Request $request, $conversation_id)
@@ -43,11 +38,12 @@ class MessageController extends CoreController
 
         $user = Auth::user();
         $conversation = $this->conversationRepository->findOrFail($conversation_id);
-        abort_unless($user->shop_id === $conversation->shop_id || in_array( $conversation->shop_id, $user->shops->pluck('id')->toArray()) || $user->id === $conversation->user_id, 404, 'Unauthorized');
+        abort_unless($user->shop_id === $conversation->shop_id || in_array($conversation->shop_id, $user->shops->pluck('id')->toArray()) || $user->id === $conversation->user_id, 404, 'Unauthorized');
 
         $messages = $this->fetchMessages($request);
 
         $limit = $request->limit ? $request->limit : 15;
+
         return $messages->paginate($limit);
 
     }
@@ -61,16 +57,16 @@ class MessageController extends CoreController
     {
         $participant = Participant::where('conversation_id', $conversation_id)
             ->whereNull('last_read')
-            ->where(function($query){
+            ->where(function ($query): void {
                 $query->where('user_id', auth()->user()->id);
                 $query->where('type', 'user');
             })
             ->update(['last_read' => new Carbon()]);
 
-        if(0 === $participant) {
+        if ($participant === 0) {
             $participant = Participant::where('conversation_id', $conversation_id)
                 ->whereNull('last_read')
-                ->where(function($query){
+                ->where(function ($query): void {
                     $query->whereIn('shop_id', auth()->user()->shops->pluck('id'));
                     $query->orWhere('shop_id', auth()->user()->shop_id);
                     $query->where('type', 'shop');
@@ -94,24 +90,23 @@ class MessageController extends CoreController
                 ->orWhere('shop_id', $user->shop_id)
                 ->with(['user', 'shop'])->first();
 
-            if(empty($conversation)) {
-                throw new MarvelException(NOT_AUTHORIZED);
+            if (empty($conversation)) {
+                throw new DurrbarException(NOT_AUTHORIZED);
             }
 
             return $this->repository->where('conversation_id', $conversation_id)
                 ->with(['conversation.shop', 'conversation.user.profile'])
                 ->orderBy('id', 'DESC');
         } catch (\Exception $e) {
-            throw new MarvelException(NOT_AUTHORIZED);
+            throw new DurrbarException(NOT_AUTHORIZED);
         }
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param MessageCreateRequest $request
-     * @param $conversation_id
      * @return mixed
+     *
      * @throws ValidatorException
      */
     public function store(MessageCreateRequest $request, $conversation_id)
@@ -124,8 +119,8 @@ class MessageController extends CoreController
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
      * @return mixed
+     *
      * @throws ValidatorException
      */
     public function storeMessage(Request $request)

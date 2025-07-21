@@ -2,29 +2,26 @@
 
 namespace Modules\Chat\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\Cache;
 use Modules\Chat\Models\Conversation;
 use Modules\Chat\Models\Message;
-use Modules\Ecommerce\Exceptions\MarvelException;
-use Modules\Role\Enums\Permission;
+use Modules\Core\Exceptions\DurrbarException;
 use Modules\Settings\Models\Settings;
 use Modules\User\Models\User;
 use Modules\User\Traits\UsersTrait;
 use Modules\Vendor\Models\Shop;
-use Pusher\Pusher;
 
 // why it does not implement queue ? is it for instant delivery or there are another reasons ?
 class MessageSent implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels, UsersTrait;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
+    use UsersTrait;
 
     /**
      * user
@@ -49,17 +46,11 @@ class MessageSent implements ShouldBroadcast
 
     /**
      * type
-     *
      */
     public $type;
 
     /**
      * Create a new event instance.
-     *
-     * @param Message $message
-     * @param Conversation $conversation
-     * @param $type
-     *
      */
     public function __construct(Message $message, Conversation $conversation, $type, User $user)
     {
@@ -80,18 +71,20 @@ class MessageSent implements ShouldBroadcast
             case 'shop':
                 // this case happen when admin send message to shop/vendor
                 $shop_owner = Shop::findOrFail($this->conversation->shop_id);
+
                 return [
-                    new PrivateChannel('message.created.' . $shop_owner->owner_id)
+                    new PrivateChannel('message.created.'.$shop_owner->owner_id),
                 ];
                 break;
 
             case 'user':
                 // this case happen when user send message to admin
                 $event_channels = [];
-                foreach ($this->getAdminUsers() as $key => $user) {
-                    $channel_name = new PrivateChannel('message.created.' . $user->id);
+                foreach ($this->getAdminUsers() as $user) {
+                    $channel_name = new PrivateChannel('message.created.'.$user->id);
                     array_push($event_channels, $channel_name);
                 }
+
                 return $event_channels;
                 break;
         }
@@ -127,7 +120,7 @@ class MessageSent implements ShouldBroadcast
             $settings = Settings::first();
             $enableBroadCast = false;
 
-            if (!config('shop.pusher.enabled')) {
+            if (! config('shop.pusher.enabled')) {
                 return false;
             }
 
@@ -136,10 +129,11 @@ class MessageSent implements ShouldBroadcast
                     $enableBroadCast = true;
                 }
             }
+
             return $enableBroadCast;
             // return $settings->options['pushNotification']['all']['message'] == true;
-        } catch (MarvelException $th) {
-            throw new MarvelException(SOMETHING_WENT_WRONG, $th->getMessage());
+        } catch (DurrbarException $th) {
+            throw new DurrbarException(SOMETHING_WENT_WRONG, $th->getMessage());
         }
     }
 }

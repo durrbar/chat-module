@@ -3,9 +3,8 @@
 namespace Modules\Chat\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Modules\Chat\Events\MessageSent;
 use Modules\Chat\Models\Participant;
 use Modules\Notification\Notifications\MessageReminder;
@@ -26,16 +25,15 @@ class SendMessageNotification implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @param  MessageSent  $event
      * @return void
      */
     public function handle(MessageSent $event)
     {
         $participant = Participant::where('message_id', $event->message->id)->first();
 
-        if (null === $participant->last_read) {
-            if (0 === $participant->notify) {
-                if ('user' == $event->type) {
+        if ($participant->last_read === null) {
+            if ($participant->notify === 0) {
+                if ($event->type == 'user') {
                     $user = User::findOrFail($event->conversation->user_id);
                     $notification = isset($user->profile->notifications) ? $user->profile->notifications : null;
                     if (empty($notification)) {
@@ -50,9 +48,9 @@ class SendMessageNotification implements ShouldQueue
                         $notification['email'] = $shop->owner->email;
                     }
                 }
-                if (1 == $notification["enable"]) {
+                if ($notification['enable'] == 1) {
                     Notification::route('mail', [
-                        $notification["email"],
+                        $notification['email'],
                     ])->notify(new MessageReminder($participant));
 
                     $participant->notify = 1;

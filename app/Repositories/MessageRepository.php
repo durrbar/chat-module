@@ -2,25 +2,19 @@
 
 namespace Modules\Chat\Repositories;
 
-use App\Events\ReviewCreated;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Modules\Chat\Events\MessageSent;
 use Modules\Chat\Models\Conversation;
 use Modules\Chat\Models\Message;
+use Modules\Core\Exceptions\DurrbarException;
 use Modules\Core\Repositories\BaseRepository;
-use Modules\Ecommerce\Models\Participant;
-use Modules\Ecommerce\Exceptions\MarvelException;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Prettus\Repository\Exceptions\RepositoryException;
-use Stevebauman\Purify\Facades\Purify;
-
 
 class MessageRepository extends BaseRepository
 {
-
     public function boot()
     {
         try {
@@ -28,7 +22,6 @@ class MessageRepository extends BaseRepository
         } catch (RepositoryException $e) {
         }
     }
-
 
     /**
      * Configure the Model
@@ -39,7 +32,6 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @param $request
      * @return LengthAwarePaginator|JsonResponse|Collection|mixed
      */
     public function storeMessage($request)
@@ -50,27 +42,27 @@ class MessageRepository extends BaseRepository
             $conversation = Conversation::findOrFail($conversation_id);
             $authorize = [
                 'user' => false,
-                'shop' => false
+                'shop' => false,
             ];
             if ($request->user()->id == $conversation->user_id) {
                 $authorize['user'] = true;
-                $type =  "shop";
+                $type = 'shop';
             }
             if (
                 in_array($conversation->shop_id, $request->user()->shops()->pluck('id')->toArray()) ||
                 $conversation->shop_id === $request->user()->shop_id
             ) {
                 $authorize['shop'] = true;
-                $type =  "user";
+                $type = 'user';
             }
-            if (false === $authorize['user'] && false === $authorize['shop']) {
-                throw new MarvelException(NOT_AUTHORIZED);
+            if ($authorize['user'] === false && $authorize['shop'] === false) {
+                throw new DurrbarException(NOT_AUTHORIZED);
             }
 
             $message = $this->create([
-                'body'              => $request->message,
-                'conversation_id'   => $conversation_id,
-                'user_id'           => $request->user()->id,
+                'body' => $request->message,
+                'conversation_id' => $conversation_id,
+                'user_id' => $request->user()->id,
             ]);
 
             $message->conversation->update(['updated_at' => now()]);
@@ -79,7 +71,7 @@ class MessageRepository extends BaseRepository
 
             return $message;
         } catch (\Exception $e) {
-            throw new MarvelException(NOT_AUTHORIZED);
+            throw new DurrbarException(NOT_AUTHORIZED);
         }
     }
 }

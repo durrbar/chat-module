@@ -9,20 +9,13 @@ use Modules\Vendor\Models\Shop;
 
 class Participant extends Model
 {
-
     public $guarded = [];
 
-    /**
-     * @return belongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * @return belongsTo
-     */
     public function shop(): BelongsTo
     {
         return $this->belongsTo(Shop::class, 'shop_id');
@@ -43,5 +36,4 @@ class Participant extends Model
     {
         return $this->belongsTo(Message::class, 'message_id');
     }
-
 }
