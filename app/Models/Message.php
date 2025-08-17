@@ -2,6 +2,7 @@
 
 namespace Modules\Chat\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -9,6 +10,8 @@ use Modules\User\Models\User;
 
 class Message extends Model
 {
+    use HasUuids;
+    
     public $timestamps = true;
 
     public $guarded = [];

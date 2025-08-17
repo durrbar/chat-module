@@ -2,6 +2,7 @@
 
 namespace Modules\Chat\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,8 @@ use Modules\Vendor\Models\Shop;
 
 class Conversation extends Model
 {
+    use HasUuids;
+    
     public $guarded = [];
 
     protected $appends = [
