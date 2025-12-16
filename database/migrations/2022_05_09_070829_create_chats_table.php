@@ -62,9 +62,9 @@ return new class () extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('conversations');
-        Schema::dropIfExists('messages');
         Schema::dropIfExists('participants');
+        Schema::dropIfExists('messages');
+        Schema::dropIfExists('conversations');
         Schema::table('user_profiles', function ($table): void {
             $table->dropColumn('notifications');
         });
