@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class () extends Migration {
+return new class() extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -14,34 +17,26 @@ return new class () extends Migration {
     {
         Schema::create('conversations', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->uuid('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->uuid('shop_id');
-            $table->foreign('shop_id')->references('id')->on('shops')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('shop_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
 
         Schema::create('messages', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->uuid('conversation_id');
-            $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade');
-            $table->uuid('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignUuid('conversation_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->text('body');
             $table->timestamps();
         });
 
         Schema::create('participants', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->uuid('conversation_id');
-            $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade');
+            $table->foreignUuid('conversation_id')->constrained()->cascadeOnDelete();
             $table->enum('type', ['shop', 'user']);
-            $table->uuid('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->uuid('shop_id');
-            $table->foreign('shop_id')->references('id')->on('shops')->onDelete('cascade');
-            $table->uuid('message_id');
-            $table->foreign('message_id')->references('id')->on('messages')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('shop_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('message_id')->constrained()->cascadeOnDelete();
             $table->boolean('notify')->default(0);
             $table->timestamp('last_read')->nullable();
             $table->timestamps();
