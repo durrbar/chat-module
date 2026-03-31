@@ -37,8 +37,9 @@ class ConversationController extends CoreController
     public function show($conversation_id)
     {
         $user = Auth::user();
+        $shopIds = $user->shops()->pluck('id')->toArray();
         $conversation = $this->repository->with(['shop', 'user.profile'])->findOrFail($conversation_id);
-        abort_unless($user->shop_id === $conversation->shop_id || in_array($conversation->shop_id, $user->shops->pluck('id')->toArray()) || $user->id === $conversation->user_id, 404, 'Unauthorized');
+        abort_unless($user->shop_id === $conversation->shop_id || in_array($conversation->shop_id, $shopIds) || $user->id === $conversation->user_id, 404, 'Unauthorized');
 
         return $conversation;
     }
@@ -50,13 +51,20 @@ class ConversationController extends CoreController
      */
     public function fetchConversations(Request $request)
     {
+        $with = ['user.profile', 'shop'];
+
+        if (str_contains((string) $request->include, 'conversation.messages')) {
+            $with[] = 'messages';
+        }
+
         return $this->repository->where(function ($query): void {
             $user = Auth::user();
+            $shopIds = $user->shops()->pluck('id');
             $query->where('user_id', $user->id);
-            $query->orWhereIn('shop_id', $user->shops->pluck('id'));
+            $query->orWhereIn('shop_id', $shopIds);
             $query->orWhere('shop_id', $user->shop_id);
             $query->orderBy('updated_at', 'desc');
-        })->with(['user.profile', 'shop']);
+        })->with($with);
     }
 
     /**

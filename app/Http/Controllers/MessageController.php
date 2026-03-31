@@ -37,8 +37,9 @@ class MessageController extends CoreController
         $request->conversation_id = $conversation_id;
 
         $user = Auth::user();
+        $shopIds = $user->shops()->pluck('id')->toArray();
         $conversation = $this->conversationRepository->findOrFail($conversation_id);
-        abort_unless($user->shop_id === $conversation->shop_id || in_array($conversation->shop_id, $user->shops->pluck('id')->toArray()) || $user->id === $conversation->user_id, 404, 'Unauthorized');
+        abort_unless($user->shop_id === $conversation->shop_id || in_array($conversation->shop_id, $shopIds) || $user->id === $conversation->user_id, 404, 'Unauthorized');
 
         $messages = $this->fetchMessages($request);
 
@@ -64,10 +65,11 @@ class MessageController extends CoreController
             ->update(['last_read' => new Carbon()]);
 
         if ($participant === 0) {
+            $shopIds = auth()->user()->shops()->pluck('id');
             $participant = Participant::where('conversation_id', $conversation_id)
                 ->whereNull('last_read')
-                ->where(function ($query): void {
-                    $query->whereIn('shop_id', auth()->user()->shops->pluck('id'));
+                ->where(function ($query) use ($shopIds): void {
+                    $query->whereIn('shop_id', $shopIds);
                     $query->orWhere('shop_id', auth()->user()->shop_id);
                     $query->where('type', 'shop');
                 })
@@ -94,8 +96,18 @@ class MessageController extends CoreController
                 throw new DurrbarException(NOT_AUTHORIZED);
             }
 
+            $with = ['conversation.shop', 'conversation.user.profile'];
+
+            if (str_contains((string) $request->include, 'message.user')) {
+                $with[] = 'user';
+            }
+
+            if (str_contains((string) $request->include, 'message.conversation')) {
+                $with[] = 'conversation';
+            }
+
             return $this->repository->where('conversation_id', $conversation_id)
-                ->with(['conversation.shop', 'conversation.user.profile'])
+                ->with($with)
                 ->orderBy('id', 'DESC');
         } catch (\Exception $e) {
             throw new DurrbarException(NOT_AUTHORIZED);
