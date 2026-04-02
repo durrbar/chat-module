@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Chat\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,16 +14,14 @@ use Illuminate\Support\Facades\Auth;
 use Modules\User\Models\User;
 use Modules\Vendor\Models\Shop;
 
+#[Unguarded]
+#[Appends([
+    'latest_message',
+    'unseen',
+])]
 class Conversation extends Model
 {
     use HasUuids;
-    
-    public $guarded = [];
-
-    protected $appends = [
-        'latest_message',
-        'unseen',
-    ];
 
     public function user(): BelongsTo
     {
@@ -59,13 +61,14 @@ class Conversation extends Model
         if (Auth::check()) {
             $instance = $this->participants()->whereNull('last_read')->where('user_id', auth()->user()->id)->where('type', 'user')->count();
 
-            if ($instance == 0) {
+            if ($instance === 0) {
                 $instance = $this->participants()->whereNull('last_read')->whereIn('shop_id', auth()->user()->shops()->pluck('id'))->where('type', 'shop')->count();
             }
 
             return $instance;
-        } else {
-            return '0';
         }
+
+        return '0';
+
     }
 }

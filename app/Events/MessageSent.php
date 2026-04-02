@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Chat\Events;
 
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -63,7 +66,7 @@ class MessageSent implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
@@ -82,7 +85,7 @@ class MessageSent implements ShouldBroadcast
                 $event_channels = [];
                 foreach ($this->getAdminUsers() as $user) {
                     $channel_name = new PrivateChannel('message.created.'.$user->id);
-                    array_push($event_channels, $channel_name);
+                    $event_channels[] = $channel_name;
                 }
 
                 return $event_channels;
@@ -125,7 +128,7 @@ class MessageSent implements ShouldBroadcast
             }
 
             if (isset($settings->options['pushNotification']['all']['message'])) {
-                if ($settings->options['pushNotification']['all']['message'] == true) {
+                if ($settings->options['pushNotification']['all']['message'] === true) {
                     $enableBroadCast = true;
                 }
             }

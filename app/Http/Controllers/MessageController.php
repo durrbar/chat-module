@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Chat\Http\Controllers;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -109,7 +112,7 @@ class MessageController extends CoreController
             return $this->repository->where('conversation_id', $conversation_id)
                 ->with($with)
                 ->orderBy('id', 'DESC');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new DurrbarException(NOT_AUTHORIZED);
         }
     }

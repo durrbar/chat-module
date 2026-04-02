@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Chat\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\User\Models\User;
 
+#[Unguarded]
 class Message extends Model
 {
     use HasUuids;
-    
-    public $timestamps = true;
 
-    public $guarded = [];
+    public $timestamps = true;
 
     // protected $appends = ['content'];
 
@@ -33,7 +35,7 @@ class Message extends Model
     }
 
     /**
-     * @return belongsTo
+     * @return BelongsTo
      */
     public function participant(): HasOne
     {

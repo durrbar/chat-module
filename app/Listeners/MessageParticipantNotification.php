@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Chat\Listeners;
 
 use Modules\Chat\Events\MessageSent;

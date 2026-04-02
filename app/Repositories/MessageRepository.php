@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Chat\Repositories;
 
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
@@ -44,7 +47,7 @@ class MessageRepository extends BaseRepository
                 'user' => false,
                 'shop' => false,
             ];
-            if ($request->user()->id == $conversation->user_id) {
+            if ($request->user()->id === $conversation->user_id) {
                 $authorize['user'] = true;
                 $type = 'shop';
             }
@@ -70,7 +73,7 @@ class MessageRepository extends BaseRepository
             event(new MessageSent($message, $conversation, $type, $request->user()));
 
             return $message;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new DurrbarException(NOT_AUTHORIZED);
         }
     }

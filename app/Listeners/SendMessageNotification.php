@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Chat\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -33,7 +35,7 @@ class SendMessageNotification implements ShouldQueue
 
         if ($participant->last_read === null) {
             if ($participant->notify === 0) {
-                if ($event->type == 'user') {
+                if ($event->type === 'user') {
                     $user = User::findOrFail($event->conversation->user_id);
                     $notification = isset($user->profile->notifications) ? $user->profile->notifications : null;
                     if (empty($notification)) {
@@ -48,7 +50,7 @@ class SendMessageNotification implements ShouldQueue
                         $notification['email'] = $shop->owner->email;
                     }
                 }
-                if ($notification['enable'] == 1) {
+                if ($notification['enable'] === 1) {
                     Notification::route('mail', [
                         $notification['email'],
                     ])->notify(new MessageReminder($participant));

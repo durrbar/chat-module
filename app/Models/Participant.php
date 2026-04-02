@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Chat\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\User\Models\User;
 use Modules\Vendor\Models\Shop;
 
+#[Unguarded]
 class Participant extends Model
 {
     use HasUuids;
-    
-    public $guarded = [];
 
     public function user(): BelongsTo
     {
