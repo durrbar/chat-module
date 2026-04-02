@@ -16,7 +16,7 @@ class ConversationRepository extends BaseRepository
         'user.name' => 'like',
     ];
 
-    public function boot()
+    public function boot(): void
     {
         try {
             $this->pushCriteria(app(RequestCriteria::class));
@@ -27,7 +27,7 @@ class ConversationRepository extends BaseRepository
     /**
      * Configure the Model
      **/
-    public function model()
+    public function model(): string
     {
         return Conversation::class;
     }
