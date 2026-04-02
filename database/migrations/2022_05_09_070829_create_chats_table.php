@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Modules\Chat\Enums\ChatParticipantType;
 
 return new class() extends Migration
 {
@@ -33,7 +34,7 @@ return new class() extends Migration
         Schema::create('participants', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('conversation_id')->constrained()->cascadeOnDelete();
-            $table->enum('type', ['shop', 'user']);
+            $table->enum('type', ChatParticipantType::cases());
             $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('shop_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('message_id')->constrained()->cascadeOnDelete();

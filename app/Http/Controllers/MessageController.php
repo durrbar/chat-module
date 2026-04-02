@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Modules\Chat\Enums\ChatParticipantType;
 use Modules\Chat\Models\Conversation;
 use Modules\Chat\Models\Participant;
 use Modules\Chat\Repositories\ConversationRepository;
@@ -63,7 +64,7 @@ class MessageController extends CoreController
             ->whereNull('last_read')
             ->where(function ($query): void {
                 $query->where('user_id', auth()->user()->id);
-                $query->where('type', 'user');
+                $query->where('type', ChatParticipantType::User->value);
             })
             ->update(['last_read' => new Carbon()]);
 
@@ -74,7 +75,7 @@ class MessageController extends CoreController
                 ->where(function ($query) use ($shopIds): void {
                     $query->whereIn('shop_id', $shopIds);
                     $query->orWhere('shop_id', auth()->user()->shop_id);
-                    $query->where('type', 'shop');
+                    $query->where('type', ChatParticipantType::Shop->value);
                 })
                 ->update(['last_read' => new Carbon()]);
         }

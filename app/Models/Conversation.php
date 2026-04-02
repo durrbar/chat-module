@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
+use Modules\Chat\Enums\ChatParticipantType;
 use Modules\User\Models\User;
 use Modules\Vendor\Models\Shop;
 
@@ -57,10 +58,10 @@ class Conversation extends Model
     public function getUnseenAttribute(): int|string
     {
         if (Auth::check()) {
-            $instance = $this->participants()->whereNull('last_read')->where('user_id', auth()->user()->id)->where('type', 'user')->count();
+            $instance = $this->participants()->whereNull('last_read')->where('user_id', auth()->user()->id)->where('type', ChatParticipantType::User->value)->count();
 
             if ($instance === 0) {
-                $instance = $this->participants()->whereNull('last_read')->whereIn('shop_id', auth()->user()->shops()->pluck('id'))->where('type', 'shop')->count();
+                $instance = $this->participants()->whereNull('last_read')->whereIn('shop_id', auth()->user()->shops()->pluck('id'))->where('type', ChatParticipantType::Shop->value)->count();
             }
 
             return $instance;

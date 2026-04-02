@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
+use Modules\Chat\Enums\ChatParticipantType;
 use Modules\Chat\Events\MessageSent;
 use Modules\Chat\Models\Conversation;
 use Modules\Chat\Models\Message;
@@ -49,14 +50,14 @@ class MessageRepository extends BaseRepository
             ];
             if ($request->user()->id === $conversation->user_id) {
                 $authorize['user'] = true;
-                $type = 'shop';
+                $type = ChatParticipantType::Shop->value;
             }
             if (
                 in_array($conversation->shop_id, $request->user()->shops()->pluck('id')->toArray()) ||
                 $conversation->shop_id === $request->user()->shop_id
             ) {
                 $authorize['shop'] = true;
-                $type = 'user';
+                $type = ChatParticipantType::User->value;
             }
             if ($authorize['user'] === false && $authorize['shop'] === false) {
                 throw new DurrbarException(NOT_AUTHORIZED);
