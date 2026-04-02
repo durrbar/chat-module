@@ -40,10 +40,8 @@ class Conversation extends Model
 
     /**
      * Returns the latest message from a conversation.
-     *
-     * @return Message
      */
-    public function getLatestMessageAttribute()
+    public function getLatestMessageAttribute(): ?Message
     {
         return $this->messages()->latest()->first();
     }
@@ -51,12 +49,12 @@ class Conversation extends Model
     /**
      * Get all of the conversations participants.
      */
-    public function participants()
+    public function participants(): HasMany
     {
         return $this->hasMany(Participant::class, 'conversation_id');
     }
 
-    public function getUnseenAttribute()
+    public function getUnseenAttribute(): int|string
     {
         if (Auth::check()) {
             $instance = $this->participants()->whereNull('last_read')->where('user_id', auth()->user()->id)->where('type', 'user')->count();
