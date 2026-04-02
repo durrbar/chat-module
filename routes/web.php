@@ -26,7 +26,7 @@ Route::group([], function (): void {
  * Authorized Route for Customers only
  * ******************************************
  */
-Route::group(['middleware' => ['can:'.Permission::CUSTOMER, 'auth:sanctum', 'email.verified']], function (): void {
+Route::group(['middleware' => ['can:'.Permission::Customer->value, 'auth:sanctum', 'email.verified']], function (): void {
     Route::apiResource('conversations', ConversationController::class, [
         'only' => ['index', 'store'],
     ]);
