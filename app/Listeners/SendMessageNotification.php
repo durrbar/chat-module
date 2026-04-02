@@ -7,6 +7,7 @@ namespace Modules\Chat\Listeners;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Notification;
+use Modules\Chat\Enums\ChatParticipantType;
 use Modules\Chat\Events\MessageSent;
 use Modules\Chat\Models\Participant;
 use Modules\Notification\Notifications\MessageReminder;
@@ -35,7 +36,7 @@ class SendMessageNotification implements ShouldQueue
 
         if ($participant->last_read === null) {
             if ($participant->notify === 0) {
-                if ($event->type === 'user') {
+                if ($event->type === ChatParticipantType::User->value) {
                     $user = User::findOrFail($event->conversation->user_id);
                     $notification = isset($user->profile->notifications) ? $user->profile->notifications : null;
                     if (empty($notification)) {

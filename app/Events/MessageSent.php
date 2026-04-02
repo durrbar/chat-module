@@ -10,6 +10,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Modules\Chat\Enums\ChatParticipantType;
 use Modules\Chat\Models\Conversation;
 use Modules\Chat\Models\Message;
 use Modules\Core\Exceptions\DurrbarException;
@@ -71,7 +72,7 @@ class MessageSent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         switch ($this->type) {
-            case 'shop':
+            case ChatParticipantType::Shop->value:
                 // this case happen when admin send message to shop/vendor
                 $shop_owner = Shop::findOrFail($this->conversation->shop_id);
 
@@ -80,7 +81,7 @@ class MessageSent implements ShouldBroadcast
                 ];
                 break;
 
-            case 'user':
+            case ChatParticipantType::User->value:
                 // this case happen when user send message to admin
                 $event_channels = [];
                 foreach ($this->getAdminUsers() as $user) {
