@@ -28,41 +28,14 @@ class MessageSent implements ShouldBroadcast
     use UsersTrait;
 
     /**
-     * user
-     *
-     * @var User
-     */
-    public $user;
-
-    /**
-     * message
-     *
-     * @var Message
-     */
-    public $message;
-
-    /**
-     * conversation
-     *
-     * @var Conversation
-     */
-    public $conversation;
-
-    /**
-     * type
-     */
-    public $type;
-
-    /**
      * Create a new event instance.
      */
-    public function __construct(Message $message, Conversation $conversation, $type, User $user)
-    {
-        $this->message = $message;
-        $this->conversation = $conversation;
-        $this->type = $type;
-        $this->user = $user;
-    }
+    public function __construct(
+        public Message $message,
+        public Conversation $conversation,
+        public mixed $type,
+        public User $user
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.
