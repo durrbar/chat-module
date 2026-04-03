@@ -12,9 +12,8 @@ class MessageParticipantNotification
     /**
      * Handle the event.
      *
-     * @return void
      */
-    public function handle(MessageSent $event)
+    public function handle(MessageSent $event): void
     {
         // set participant
         Participant::create([

@@ -28,9 +28,8 @@ class SendMessageNotification implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @return void
      */
-    public function handle(MessageSent $event)
+    public function handle(MessageSent $event): void
     {
         $participant = Participant::where('message_id', $event->message->id)->first();
 
