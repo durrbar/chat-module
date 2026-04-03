@@ -18,16 +18,10 @@ class SendMessageNotification implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    /**
-     * The time (seconds) before the job should be processed.
-     *
-     * @var int
-     */
-    public $delay = 900;
+    public int $delay = 900;
 
     /**
      * Handle the event.
-     *
      */
     public function handle(MessageSent $event): void
     {
@@ -37,7 +31,7 @@ class SendMessageNotification implements ShouldQueue
             if ($participant->notify === 0) {
                 if ($event->type === ChatParticipantType::User->value) {
                     $user = User::findOrFail($event->conversation->user_id);
-                    $notification = isset($user->profile->notifications) ? $user->profile->notifications : null;
+                    $notification = $user->profile?->notifications;
                     if (empty($notification)) {
                         $notification['enable'] = 1;
                         $notification['email'] = $user->email;

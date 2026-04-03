@@ -11,7 +11,6 @@ class MessageParticipantNotification
 {
     /**
      * Handle the event.
-     *
      */
     public function handle(MessageSent $event): void
     {
