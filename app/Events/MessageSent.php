@@ -27,9 +27,6 @@ class MessageSent implements ShouldBroadcast
     use SerializesModels;
     use UsersTrait;
 
-    /**
-     * Create a new event instance.
-     */
     public function __construct(
         public Message $message,
         public Conversation $conversation,
@@ -46,25 +43,22 @@ class MessageSent implements ShouldBroadcast
     {
         switch ($this->type) {
             case ChatParticipantType::Shop->value:
-                // this case happen when admin send message to shop/vendor
-                $shop_owner = Shop::findOrFail($this->conversation->shop_id);
+                $shopOwner = Shop::findOrFail($this->conversation->shop_id);
 
                 return [
-                    new PrivateChannel('message.created.'.$shop_owner->owner_id),
+                    new PrivateChannel('message.created.'.$shopOwner->owner_id),
                 ];
-                break;
 
             case ChatParticipantType::User->value:
-                // this case happen when user send message to admin
-                $event_channels = [];
+                $eventChannels = [];
                 foreach ($this->getAdminUsers() as $user) {
-                    $channel_name = new PrivateChannel('message.created.'.$user->id);
-                    $event_channels[] = $channel_name;
+                    $eventChannels[] = new PrivateChannel('message.created.'.$user->id);
                 }
 
-                return $event_channels;
-                break;
+                return $eventChannels;
         }
+
+        return [];
     }
 
     /**
@@ -84,7 +78,6 @@ class MessageSent implements ShouldBroadcast
      */
     public function broadcastAs(): string
     {
-        // event's name will be written here.
         return 'message.event';
     }
 
@@ -108,7 +101,6 @@ class MessageSent implements ShouldBroadcast
             }
 
             return $enableBroadCast;
-            // return $settings->options['pushNotification']['all']['message'] == true;
         } catch (DurrbarException $th) {
             throw new DurrbarException(SOMETHING_WENT_WRONG, $th->getMessage());
         }

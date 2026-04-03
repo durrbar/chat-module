@@ -9,12 +9,8 @@ use Modules\Chat\Models\Participant;
 
 class MessageParticipantNotification
 {
-    /**
-     * Handle the event.
-     */
     public function handle(MessageSent $event): void
     {
-        // set participant
         Participant::create([
             'type' => $event->type,
             'conversation_id' => $event->conversation->id,
